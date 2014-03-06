@@ -39,7 +39,7 @@ int rate_array_size;
 struct queue_root * tap_input_queue;
 seq_queue tap_private_queue;
 
-#define NUM_WORKERS 4
+#define NUM_WORKERS 8
 
 //note that for token buket, the buffer size has to be max_rate/(frequency). So max rate for now is: 10MBps
 #define BUFF_SIZE (1024*10)
@@ -995,7 +995,7 @@ main(int argc, char **argv)
 	//mask_sigusr();
 	if(argc!=2)
 	{
-		printf("Usage: bmod logfile_name\n Log file entries should be in kbps\n");
+		printf("Usage: bmod logfile_name\n Log file entries should be in kbps\n. Or bmod --none or -n");
 		return 1;
 	}
 	
@@ -1027,8 +1027,11 @@ main(int argc, char **argv)
 
 	main_base = event_base_new();
 
-	fill_rates(argv[1]);
-	
+	if(strcmp(argv[1],"--none") && strcmp(argv[1],"-n")) //used for no log file case
+	{
+		fill_rates(argv[1]);
+		rate_array_size = 0;
+	}
 	//after this point things will start running, ensure that entries are initialized before this point
 	pthread_t fishing_thread;
 	int err = pthread_create( &fishing_thread, NULL, &event_worker, NULL);
